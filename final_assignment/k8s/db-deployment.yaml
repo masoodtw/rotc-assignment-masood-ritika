@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rotc-db-deployment
+  labels:
+    app: crud-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rotc-db
+  template:
+    metadata:
+      labels:
+        app: rotc-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: db-password
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: rotc-db-volume
+      volumes:
+        - name: rotc-db-volume
+          persistentVolumeClaim:
+            claimName: rotc-pvc
